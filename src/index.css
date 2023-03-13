@@ -91,3 +91,34 @@ body {
 .button:hover {
   background-color: #66bfd8;
 }
+.addimageUrl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: default;
+}
+.addimageUrl > label {
+  background-color: #66bfd8;
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.addimageUrl #PhotoCameraIcon {
+  color: white;
+  transition: all 0.3s ease;
+}
+.addimageUrl > label:hover #PhotoCameraIcon {
+  transform: scale(1.3);
+}
+.addimageUrl img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  overflow: hidden;
+  border-radius: 100%;
+}

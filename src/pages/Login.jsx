@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import logo from "../assets/logo.png";
 import vr from "../assets/vr.png";
 import Button from "../components/Button";
@@ -13,6 +14,8 @@ const Login = () => {
     matchPass: "",
   });
   const [passMatchErr, setPassMatchErr] = useState(false);
+  const [addImageUrl, setAddImageUrl] = useState(false);
+  const [imageToUpload, setImageToUpload] = useState();
   const getFormData = (name, value) => {
     setData({ ...data, [name]: value });
   };
@@ -26,50 +29,80 @@ const Login = () => {
           <img src={vr} alt="vr" id="VarFormImg" />
         </div>
         <div className="authFormInputs">
-          <h1>Log into your account</h1>
-          <div>
-            <Input
-              placeholder="Name"
-              onChange={(text) => getFormData("name", text)}
-              required
-              value={data.name}
-            />
-            <Input
-              placeholder="Last name"
-              onChange={(text) => getFormData("lastName", text)}
-              required
-              value={data.lastName}
-            />
-            <Input
-              placeholder="Email"
-              onChange={(text) => getFormData("email", text)}
-              required
-              value={data.email}
-            />
-            <Input
-              placeholder="Password"
-              onChange={(text) => getFormData("password", text)}
-              required
-              value={data.password}
-            />
-            <Input
-              placeholder="Confirm password"
-              onChange={(text) => {
-                getFormData("matchPass", text);
-                if (text !== data.password) {
-                  setPassMatchErr(true);
-                } else {
-                  setPassMatchErr(false);
+          <h1>Create account</h1>
+          {!addImageUrl && (
+            <div>
+              <Input
+                placeholder="Name"
+                onChange={(text) => getFormData("name", text)}
+                required
+                value={data.name}
+              />
+              <Input
+                placeholder="Last name"
+                onChange={(text) => getFormData("lastName", text)}
+                required
+                value={data.lastName}
+              />
+              <Input
+                placeholder="Email"
+                onChange={(text) => getFormData("email", text)}
+                required
+                value={data.email}
+              />
+              <Input
+                placeholder="Password"
+                onChange={(text) => getFormData("password", text)}
+                required
+                value={data.password}
+              />
+              <Input
+                placeholder="Confirm password"
+                onChange={(text) => {
+                  getFormData("matchPass", text);
+                  if (text !== data.password) {
+                    setPassMatchErr(true);
+                  } else {
+                    setPassMatchErr(false);
+                  }
+                }}
+                className={passMatchErr && "inputError"}
+                errorMessage={passMatchErr && "Password don't mach"}
+                required
+              />
+            </div>
+          )}
+          {!addImageUrl && (
+            <Button label={"Next"} onClick={() => setAddImageUrl(true)} />
+          )}
+          {addImageUrl && (
+            <div className="addimageUrl">
+              <p>Upload image</p>
+              <label htmlFor="image">
+                {imageToUpload ? (
+                  <img alt="profile" src={imageToUpload} />
+                ) : (
+                  <PhotoCameraIcon id="PhotoCameraIcon" />
+                )}
+              </label>
+
+              <input
+                type="file"
+                id="image"
+                hidden
+                onChange={(e) =>
+                  setImageToUpload(URL.createObjectURL(e.target.files[0]))
                 }
-              }}
-              className={passMatchErr && "inputError"}
-              errorMessage={passMatchErr && "Password don't mach"}
-              required
-            />
-          </div>
-          <Button label={"Next"} onClick={() => console.log(data)} />
+              />
+              {imageToUpload && (
+                <Button
+                  label={"Create account"}
+                  onClick={() => setAddImageUrl(true)}
+                />
+              )}
+            </div>
+          )}
         </div>
-        <div></div>
       </div>
     </div>
   );
