@@ -4,6 +4,7 @@ import logo from "../assets/logo.png";
 import vr from "../assets/vr.png";
 import Button from "../components/Button";
 import Input from "../components/Input";
+import axios from "axios";
 
 const Login = () => {
   const [data, setData] = useState({
@@ -16,8 +17,31 @@ const Login = () => {
   const [passMatchErr, setPassMatchErr] = useState(false);
   const [addImageUrl, setAddImageUrl] = useState(false);
   const [imageToUpload, setImageToUpload] = useState();
+  const token = localStorage.getItem("token");
   const getFormData = (name, value) => {
     setData({ ...data, [name]: value });
+  };
+  const uploadImage = async (image) => {
+    const form = new FormData();
+
+    form.append("image", image);
+    //console.log(form, image);
+    axios
+      .post("http://localhost:8000/images/upload", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: "Bearer " + token,
+        },
+      })
+      .then((response) => console.log(response))
+      .catch((err) => console.log(err));
+  };
+
+  const createUser = async () => {
+    axios.post("http://localhost:8000/auth/register", data).then((r) => {
+      console.log(r);
+      // setAddImageUrl(true);
+    });
   };
 
   return (
@@ -72,15 +96,13 @@ const Login = () => {
               />
             </div>
           )}
-          {!addImageUrl && (
-            <Button label={"Next"} onClick={() => setAddImageUrl(true)} />
-          )}
+          {!addImageUrl && <Button label={"Next"} onClick={createUser} />}
           {addImageUrl && (
             <div className="addimageUrl">
               <p>Upload image</p>
               <label htmlFor="image">
                 {imageToUpload ? (
-                  <img alt="profile" src={imageToUpload} />
+                  <img alt="profile" src={URL.createObjectURL(imageToUpload)} />
                 ) : (
                   <PhotoCameraIcon id="PhotoCameraIcon" />
                 )}
@@ -90,14 +112,12 @@ const Login = () => {
                 type="file"
                 id="image"
                 hidden
-                onChange={(e) =>
-                  setImageToUpload(URL.createObjectURL(e.target.files[0]))
-                }
+                onChange={(e) => setImageToUpload(e.target.files[0])}
               />
               {imageToUpload && (
                 <Button
                   label={"Create account"}
-                  onClick={() => setAddImageUrl(true)}
+                  onClick={() => uploadImage(imageToUpload)}
                 />
               )}
             </div>
