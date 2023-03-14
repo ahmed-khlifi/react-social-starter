@@ -5,6 +5,7 @@ import vr from "../assets/vr.png";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [data, setData] = useState({
@@ -16,12 +17,25 @@ const Register = () => {
   });
   const [passMatchErr, setPassMatchErr] = useState(false);
   const [addImageUrl, setAddImageUrl] = useState(false);
+  const [error, setError] = useState(false);
   const [imageToUpload, setImageToUpload] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const token = localStorage.getItem("token");
   const getFormData = (name, value) => {
     setData({ ...data, [name]: value });
   };
+
+  const isDisabled = () => {
+    for (const key in data) {
+      // check if key is a property to data
+      if (data.hasOwnProperty(key) && data[key] === "") {
+        return true;
+      }
+    }
+    if (data.password !== data.matchPass) return true;
+    return false;
+  };
+  const navigate = useNavigate();
   const uploadImage = async (image) => {
     const form = new FormData();
 
@@ -34,16 +48,22 @@ const Register = () => {
           Authorization: "Bearer " + token,
         },
       })
-      .then((response) => console.log(response))
-      .catch((err) => console.log(err));
+      .then((response) => navigate("/auth"))
+      .catch((err) => setIsLoading(false));
   };
 
   const createUser = async () => {
     setIsLoading(true);
-    axios.post("http://localhost:8000/auth/register", data).then((r) => {
-      setIsLoading(false);
-      // setAddImageUrl(true);
-    });
+    axios
+      .post("http://localhost:8000/auth/register", data)
+      .then((r) => {
+        setIsLoading(false);
+        navigate("/auth");
+      })
+      .catch((err) => {
+        setError(true);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -56,6 +76,7 @@ const Register = () => {
         </div>
         <div className="authFormInputs">
           <h1>Create account</h1>
+          {error && <p style={{ color: "red" }}>Oops, Invalid email</p>}
           {!addImageUrl && (
             <div>
               <Input
@@ -71,25 +92,26 @@ const Register = () => {
                 value={data.lastName}
               />
               <Input
+                type="email"
                 placeholder="Email"
                 onChange={(text) => getFormData("email", text)}
                 required
                 value={data.email}
               />
               <Input
+                type="password"
                 placeholder="Password"
                 onChange={(text) => getFormData("password", text)}
                 required
                 value={data.password}
               />
               <Input
+                type="password"
                 placeholder="Confirm password"
                 onChange={(text) => {
                   getFormData("matchPass", text);
                   if (text !== data.password) {
                     setPassMatchErr(true);
-                  } else {
-                    setPassMatchErr(false);
                   }
                 }}
                 className={passMatchErr && "inputError"}
@@ -98,9 +120,15 @@ const Register = () => {
               />
             </div>
           )}
-          {!addImageUrl && (
-            <Button label={"Next"} onClick={createUser} isLoading={isLoading} />
-          )}
+          <Button
+            label={"Next"}
+            onClick={createUser}
+            isLoading={isLoading}
+            disabed={isDisabled()}
+          />
+          <div>
+            <Link to="/auth">Login instead</Link>
+          </div>
           {addImageUrl && (
             <div className="addimageUrl">
               <p>Upload image</p>

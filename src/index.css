@@ -91,6 +91,13 @@ body {
 .button:hover {
   background-color: #66bfd8;
 }
+.disbaled-btn {
+  background-color: #bebcbc;
+  cursor: default;
+}
+.disbaled-btn:hover {
+  background-color: #bebcbc;
+}
 .addimageUrl {
   display: flex;
   flex-direction: column;
@@ -121,4 +128,10 @@ body {
   object-fit: cover;
   overflow: hidden;
   border-radius: 100%;
+}
+a {
+  text-decoration: none;
+}
+.auth-page-container a {
+  color: #3badcd;
 }
