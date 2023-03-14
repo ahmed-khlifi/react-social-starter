@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
+const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
+const isEmail = (email) => {
+  if (emailRegex.test(email)) {
+    return true;
+  } else {
+    return false;
+  }
+};
 const Input = ({
   className,
   placeholder,
@@ -17,6 +25,9 @@ const Input = ({
     const handleBlur = (event) => {
       if (ref.current && !ref.current?.contains(event.target) && required) {
         if (isClicked && !value) setError(true);
+        if (isClicked && value && !isEmail(value) && type === "email") {
+          setError(true);
+        }
       }
       if (ref.current && ref.current?.contains(event.target) && required) {
         // If user did not click on input
@@ -28,7 +39,7 @@ const Input = ({
       // Unbind the event listener on clean up
       document.removeEventListener("click", handleBlur);
     };
-  }, [isClicked, ref, required, value]);
+  }, [isClicked, ref, required, type, value]);
   return (
     <div ref={ref} className="input-container">
       <input

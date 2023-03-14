@@ -1,47 +1,35 @@
 import React, { useState } from "react";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import logo from "../assets/logo.png";
-import vr from "../assets/vr.png";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import axios from "axios";
+import logo from "../assets/logo.png";
+import vr from "../assets/vr.png";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [data, setData] = useState({
-    name: "",
-    lastName: "",
     email: "",
     password: "",
-    matchPass: "",
   });
-  const [passMatchErr, setPassMatchErr] = useState(false);
-  const [addImageUrl, setAddImageUrl] = useState(false);
-  const [imageToUpload, setImageToUpload] = useState();
-  const token = localStorage.getItem("token");
+  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const getFormData = (name, value) => {
     setData({ ...data, [name]: value });
   };
-  const uploadImage = async (image) => {
-    const form = new FormData();
-
-    form.append("image", image);
-    //console.log(form, image);
-    axios
-      .post("http://localhost:8000/images/upload", form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: "Bearer " + token,
-        },
-      })
-      .then((response) => console.log(response))
-      .catch((err) => console.log(err));
-  };
-
+  const navigate = useNavigate();
   const createUser = async () => {
-    axios.post("http://localhost:8000/auth/register", data).then((r) => {
-      console.log(r);
-      // setAddImageUrl(true);
-    });
+    setIsLoading(true);
+    axios
+      .post("http://localhost:8000/auth/login", data)
+      .then(({ data }) => {
+        setIsLoading(false);
+        localStorage.setItem("token", data.token);
+        navigate("/");
+      })
+      .catch((err) => {
+        setError(err);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -53,75 +41,35 @@ const Login = () => {
           <img src={vr} alt="vr" id="VarFormImg" />
         </div>
         <div className="authFormInputs">
-          <h1>Create account</h1>
-          {!addImageUrl && (
-            <div>
-              <Input
-                placeholder="Name"
-                onChange={(text) => getFormData("name", text)}
-                required
-                value={data.name}
-              />
-              <Input
-                placeholder="Last name"
-                onChange={(text) => getFormData("lastName", text)}
-                required
-                value={data.lastName}
-              />
-              <Input
-                placeholder="Email"
-                onChange={(text) => getFormData("email", text)}
-                required
-                value={data.email}
-              />
-              <Input
-                placeholder="Password"
-                onChange={(text) => getFormData("password", text)}
-                required
-                value={data.password}
-              />
-              <Input
-                placeholder="Confirm password"
-                onChange={(text) => {
-                  getFormData("matchPass", text);
-                  if (text !== data.password) {
-                    setPassMatchErr(true);
-                  } else {
-                    setPassMatchErr(false);
-                  }
-                }}
-                className={passMatchErr && "inputError"}
-                errorMessage={passMatchErr && "Password don't mach"}
-                required
-              />
-            </div>
+          <h1>Login</h1>
+          {error && (
+            <p style={{ color: "red" }}>Oops, Invalid email or password</p>
           )}
-          {!addImageUrl && <Button label={"Next"} onClick={createUser} />}
-          {addImageUrl && (
-            <div className="addimageUrl">
-              <p>Upload image</p>
-              <label htmlFor="image">
-                {imageToUpload ? (
-                  <img alt="profile" src={URL.createObjectURL(imageToUpload)} />
-                ) : (
-                  <PhotoCameraIcon id="PhotoCameraIcon" />
-                )}
-              </label>
-
-              <input
-                type="file"
-                id="image"
-                hidden
-                onChange={(e) => setImageToUpload(e.target.files[0])}
-              />
-              {imageToUpload && (
-                <Button
-                  label={"Create account"}
-                  onClick={() => uploadImage(imageToUpload)}
-                />
-              )}
-            </div>
-          )}
+          <div>
+            <Input
+              placeholder="Email"
+              onChange={(text) => getFormData("email", text)}
+              required
+              value={data.email}
+              type="email"
+            />
+            <Input
+              placeholder="Password"
+              type="password"
+              onChange={(text) => getFormData("password", text)}
+              required
+              value={data.password}
+            />
+          </div>
+          <Button
+            label={"Login"}
+            onClick={createUser}
+            isLoading={isLoading}
+            disabed={!data.email || !data.password}
+          />
+          <div>
+            <Link to="/auth/register">Register instead</Link>
+          </div>
         </div>
       </div>
     </div>
